@@ -14,9 +14,16 @@ RUN apt update -y && \
     apt upgrade -y && \
     dpkg --add-architecture i386 && \
     apt update -y && \
-    apt install -y zip wine wine32 && \
+    apt install -y zip && \
     unzip *.zip -d /ksp/setup && \
     mv -v /ksp/setup/DMPServer/* /ksp
+
+# Install necessary dependencies
+RUN apt-get update -y \
+    && apt-get install -y wget curl gnupg2 software-properties-common \
+    && apt-get install -y mono-complete xvfb \
+    # Clean up
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ksp
 RUN rm -r setup/ && \
