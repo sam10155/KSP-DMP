@@ -1,18 +1,18 @@
-# Use the official Mono image
-FROM mono:latest
+# Use an appropriate base image
+FROM ubuntu:20.04
 
-# Add WineHQ repository and install Wine and dependencies
+# Add i386 architecture support for Wine
 RUN dpkg --add-architecture i386 \
     && apt-get update -y \
-    && apt-get install -y \
-    wget curl gnupg2 software-properties-common \
+    && apt-get install -y wget curl gnupg2 software-properties-common \
+    # Add WineHQ public key
     && curl -fsSL https://dl.winehq.org/wine-builds/Release.key | apt-key add - \
-    && apt-add-repository 'deb https://dl.winehq.org/wine-builds/debian/ stretch main' \
+    # Add WineHQ repository for Bullseye
+    && apt-add-repository 'deb https://dl.winehq.org/wine-builds/debian/ bullseye main' \
     && apt-get update -y \
-    && apt-get install -y \
-    winehq-stable \
-    xvfb \
-    wine-mono \
+    # Install Wine and necessary dependencies
+    && apt-get install -y winehq-stable xvfb wine-mono \
+    # Clean up
     && rm -rf /var/lib/apt/lists/*
 
 # Add DMPServer.zip and DMPUpdater.exe to the container
