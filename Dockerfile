@@ -1,34 +1,30 @@
-# Kerbal Space Program DMP Dedicated Server
-FROM mono
+# Use the official Mono image
+FROM mono:latest
 
-LABEL image.authors="Sam10155"
-LABEL description="KSP DMP Dedicated Server"
+# Install dependencies for Wine, Xvfb, and Wine Mono
+RUN apt-get update -y && apt-get install -y \
+    wine xvfb wine-mono \
+    && dpkg --add-architecture i386 \
+    && apt-get update -y
 
-ENV PORTGAME=6702
-
-RUN mkdir -p /ksp/setup
+# Add DMPServer.zip and DMPUpdater.exe to the container
 ADD https://d-mp.org/builds/release/v0.3.8.5/DMPServer.zip /ksp/setup/
 ADD https://d-mp.org/builds/updater/DMPUpdater.exe /ksp
 
+# Set the working directory to /ksp/setup
 WORKDIR /ksp/setup
-RUN apt update -y && \
-    apt upgrade -y && \
-    dpkg --add-architecture i386 && \
-    apt update -y && \
-    apt install -y zip wine wine32 && \
-    unzip *.zip -d /ksp/setup && \
-    mv -v /ksp/setup/DMPServer/* /ksp
 
+# Run the DMPUpdater using Wine with Xvfb to simulate an X server
+RUN xvfb-run wine ./DMPUpdater.exe
+
+# Set the working directory to /ksp to perform further setup actions
 WORKDIR /ksp
-RUN rm -r setup/ && \
-    chmod +x DMPServer.exe DMPUpdater.exe
 
-# Run Updater with Wine
-RUN wine ./DMPUpdater.exe
+# Clean up the setup directory and make sure the server files are executable
+RUN rm -r setup/ && chmod +x DMPServer.exe DMPUpdater.exe
 
-VOLUME /ksp/Config
-VOLUME /ksp/Universe
+# Expose necessary ports for the server (adjust according to your needs)
+EXPOSE 6700
 
-EXPOSE $PORTGAME/tcp
-
-ENTRYPOINT ["mono", "./DMPServer.exe"]
+# Set the entry point to run the DMPServer.exe when the container starts
+CMD ["wine", "./DMPServer.exe"]
