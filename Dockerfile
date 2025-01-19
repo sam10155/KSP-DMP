@@ -5,7 +5,7 @@ FROM mono:latest
 RUN dpkg --add-architecture i386 \
     && apt-get update -y \
     && apt-get install -y \
-    wget curl gnupg2 \
+    wget curl gnupg2 software-properties-common \
     && curl -fsSL https://dl.winehq.org/wine-builds/Release.key | apt-key add - \
     && apt-add-repository 'deb https://dl.winehq.org/wine-builds/debian/ buster main' \
     && apt-get update -y \
