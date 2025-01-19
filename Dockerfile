@@ -1,11 +1,19 @@
 # Use the official Mono image
 FROM mono:latest
 
-# Install dependencies for Wine, Xvfb, and Wine Mono
-RUN apt-get update -y && apt-get install -y \
-    wine xvfb wine-mono \
-    && dpkg --add-architecture i386 \
-    && apt-get update -y
+# Add WineHQ repository and install Wine and dependencies
+RUN dpkg --add-architecture i386 \
+    && apt-get update -y \
+    && apt-get install -y \
+    wget curl gnupg2 \
+    && curl -fsSL https://dl.winehq.org/wine-builds/Release.key | apt-key add - \
+    && apt-add-repository 'deb https://dl.winehq.org/wine-builds/debian/ buster main' \
+    && apt-get update -y \
+    && apt-get install -y \
+    winehq-stable \
+    xvfb \
+    wine-mono \
+    && rm -rf /var/lib/apt/lists/*
 
 # Add DMPServer.zip and DMPUpdater.exe to the container
 ADD https://d-mp.org/builds/release/v0.3.8.5/DMPServer.zip /ksp/setup/
